@@ -12,12 +12,16 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import androidx.annotation.RequiresApi
 import com.example.barcode_scanner.databinding.ActivityBarcodeScanBinding
+import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.camera.CameraSourceConfig
+import com.google.mlkit.vision.camera.DetectionTaskCallback
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.interfaces.Detector
+import java.util.*
 
 class BarcodeScan : AppCompatActivity() {
 
@@ -25,10 +29,10 @@ class BarcodeScan : AppCompatActivity() {
     private val options = BarcodeScannerOptions.Builder()
         .setBarcodeFormats(Barcode.FORMAT_CODE_128)
         .build()
-    private val barcodeDetector : BarcodeScanner = BarcodeScanning.getClient(options)
-    private val cameraSource : CameraSourceConfig = CameraSourceConfig.Builder(this, barcodeDetector)
-        .setRequestedPreviewSize(1024, 768)
-        .build()
+    private lateinit var barcodeDetector : BarcodeScanner
+    private lateinit var cameraSource : CameraSourceConfig
+    private lateinit var inputImage : InputImage
+    private lateinit var task : Task<List<Barcode>>
 
     private fun scanBarcodes(image: InputImage) {
 
@@ -81,6 +85,17 @@ class BarcodeScan : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        barcodeDetector = BarcodeScanning.getClient(options)
+        task = barcodeDetector.process(inputImage)
+        task.addOnSuccessListener(){
+
+        }
+
+        cameraSource = CameraSourceConfig.Builder(this, barcodeDetector)
+            .setRequestedPreviewSize(1024, 768)
+            .build()
+
         binding.svBarcode.holder.addCallback(object : SurfaceHolder.Callback2{
             override fun surfaceRedrawNeeded(holder: SurfaceHolder) {
                 TODO("Not yet implemented")
